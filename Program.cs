@@ -100,18 +100,11 @@ namespace Wally
 			proc.StartInfo.UseShellExecute			=false;
 			proc.StartInfo.Arguments				=args;
 
-//			Console.WriteLine("Args: " + args);
-
 			proc.Start();
 
 			string	res	=proc.StandardOutput.ReadToEnd();
 
-//			Console.WriteLine("Response: " + res);
-
 			proc.WaitForExit();
-
-//			Console.WriteLine("Process Exited...");
-
 			proc.Close();
 		}
 
@@ -131,7 +124,6 @@ namespace Wally
 		
 		static void OnWallTimer(object sender, EventArgs ea)
 		{
-//			Console.WriteLine("Timer tic...");
 			WallyTimer  wt  =sender as WallyTimer;
 
 			if(wt.mbShuffle)
