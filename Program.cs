@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Timers;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 
 namespace Wally
@@ -50,17 +51,19 @@ namespace Wally
 			}
 			
 			DirectoryInfo   di  =new DirectoryInfo(wallPath);
+			List<FileInfo>	fi		=new List<FileInfo>();
 			FileInfo[]      fij		=di.GetFiles("*.jpg", bRecurse? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 			FileInfo[]      fij2	=di.GetFiles("*.jpeg", bRecurse? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 			FileInfo[]      fip		=di.GetFiles("*.png", bRecurse? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 //			FileInfo[]      fig		=di.GetFiles("*.gif", bRecurse? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
-			//combine into fij
-			fij.Concat(fij2);
-			fij.Concat(fip);
+			//combine into fi
+			fi.AddRange(fij);
+			fi.AddRange(fij2);
+			fi.AddRange(fip);
 //			fij.Concat(fig);
 
-			if(fij.Length < 1)
+			if(fi.Count < 1)
 			{
 				Console.WriteLine("Wall folder has no usable walls!");
 				return;
@@ -73,18 +76,17 @@ namespace Wally
 			t.Interval	=interval * 1000;	//convert to ms
 			t.AutoReset	=true;
 			t.Elapsed	+=OnWallTimer;
-			t.mFiles	=fij;
+			t.mFiles	=fi;
 			t.mIndex	=0;
 
 			t.Start();
 
-			//usually will want zoom
-			SetPicOptions(WallOptions.zoom);
+			//make sure icons draw
 			SetShowIcons(true);
 
 			Console.WriteLine("Press any key to quit...");
-			Console.ReadKey();
-//			Console.Read();
+//			Console.ReadKey();
+			Console.Read();
 		}
 
 
@@ -128,21 +130,45 @@ namespace Wally
 
 			if(wt.mbShuffle)
 			{
-				wt.mIndex	=wt.mRand.Next(wt.mFiles.Length);
+				wt.mIndex	=wt.mRand.Next(wt.mFiles.Count);
 			}
 			else
 			{
 				wt.mIndex++;
 			}
 
-			if(wt.mIndex >= wt.mFiles.Length)
+			if(wt.mIndex >= wt.mFiles.Count)
 			{
 				wt.mIndex	=0;
 			}
 
+			//check size
+			string	path	=wt.mFiles[wt.mIndex].FullName;
+			bool	bSpan	=false;
+
+			if(path.EndsWith(".png"))
+			{
+				int	width, height;
+				if(PNGSizeGrabber.GetSize(path, out width, out height))
+				{
+					float	ratio	=width / (float)height;
+					bSpan	=(ratio > 2.5f);
+					Console.WriteLine("Ratio: " + ratio + ", Width: " + width + ", Height: " + height);
+				}
+			}
+
+			if(bSpan)
+			{
+				SetPicOptions(WallOptions.spanned);
+			}
+			else
+			{
+				SetPicOptions(WallOptions.zoom);
+			}
+
 			//run with the change command
-			DoGSCommand(SetDTop + " " + ChangeCommand + " \""
-				+ wt.mFiles[wt.mIndex].FullName + "\"");
+			DoGSCommand(SetDTop + " " + ChangeCommand
+				+ " \"" + path + "\"");
 		}
 	}
 }
