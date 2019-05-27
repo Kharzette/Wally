@@ -19,6 +19,8 @@ namespace Wally
 		const string	ChangeCommand	="picture-uri";
 		const string	PicOptions		="picture-options";
 		const string	DTopIcons		="show-desktop-icons";
+		const float		SpanRatio		=2.5f;	//greater than
+		const float		TileRatio		=1f;	//less than
 		
 		static void Main(string[] args)
 		{
@@ -85,8 +87,8 @@ namespace Wally
 			SetShowIcons(true);
 
 			Console.WriteLine("Press any key to quit...");
-//			Console.ReadKey();
-			Console.Read();
+			Console.ReadKey();
+//			Console.Read();
 		}
 
 
@@ -145,6 +147,7 @@ namespace Wally
 			//check size
 			string	path	=wt.mFiles[wt.mIndex].FullName;
 			bool	bSpan	=false;
+			bool	bTile	=false;
 
 			if(path.EndsWith(".png"))
 			{
@@ -152,14 +155,18 @@ namespace Wally
 				if(PNGSizeGrabber.GetSize(path, out width, out height))
 				{
 					float	ratio	=width / (float)height;
-					bSpan	=(ratio > 2.5f);
-					Console.WriteLine("Ratio: " + ratio + ", Width: " + width + ", Height: " + height);
+					bSpan	=(ratio > SpanRatio);
+					bTile	=(ratio < TileRatio);
 				}
 			}
 
 			if(bSpan)
 			{
 				SetPicOptions(WallOptions.spanned);
+			}
+			else if(bTile)
+			{
+				SetPicOptions(WallOptions.wallpaper);
 			}
 			else
 			{
