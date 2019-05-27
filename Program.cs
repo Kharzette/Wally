@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Timers;
+using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 
@@ -87,8 +88,17 @@ namespace Wally
 			SetShowIcons(true);
 
 			Console.WriteLine("Press any key to quit...");
-			Console.ReadKey();
+
+			//if you want to run this from command line and
+			//have the option of pressing a key to exit, use
+			//this
+//			Console.ReadKey();
+
+			//Use this when running from the debugger
 //			Console.Read();
+
+			//use this when you want to launch from gnome
+			Thread.Sleep(Timeout.Infinite);
 		}
 
 
