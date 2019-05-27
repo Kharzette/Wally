@@ -10,27 +10,6 @@
                 "${workspaceFolder}/Wally.csproj"
             ],
             "problemMatcher": "$tsc"
-        },
-        {
-            "label": "publish",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/Wally.csproj"
-            ],
-            "problemMatcher": "$tsc"
-        },
-        {
-            "label": "watch",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "watch",
-                "run",
-                "${workspaceFolder}/Wally.csproj"
-            ],
-            "problemMatcher": "$tsc"
         }
     ]
 }
