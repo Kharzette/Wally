@@ -16,12 +16,13 @@ namespace Wally
 			none, wallpaper, centered, scaled, stretched, zoom, spanned
 		};
 
-		const string	SetDTop			="set org.gnome.desktop.background";
-		const string	ChangeCommand	="picture-uri";
-		const string	PicOptions		="picture-options";
-		const string	DTopIcons		="show-desktop-icons";
-		const float		SpanRatio		=2.5f;	//greater than
-		const float		TileRatio		=1f;	//less than
+		const string	SetDTop					="set org.gnome.desktop.background";
+		const string	ChangeCommand			="picture-uri";
+		const string	PicOptions				="picture-options";
+		const string	DTopIcons				="show-desktop-icons";
+		const float		SpanRatio				=2.5f;	//greater than
+		const float		TileRatio				=1f;	//less than
+		const int		WallFolderCheckInterval	=5000;
 		
 		static void Main(string[] args)
 		{
@@ -47,10 +48,15 @@ namespace Wally
 				bRecurse	=(args[2] == "Recurse") || (args[3] == "Recurse");
 			}
 
-			if(!Directory.Exists(wallPath))
+			bool	bDir	=false;
+			while(!bDir)
 			{
-				Console.WriteLine("Path: " + wallPath + " does not exist...");
-				return;
+				bDir	=Directory.Exists(wallPath);
+				if(!bDir)
+				{
+					Console.WriteLine("Path: " + wallPath + " does not exist.  Waiting...");
+					Thread.Sleep(WallFolderCheckInterval);
+				}
 			}
 			
 			DirectoryInfo   di  =new DirectoryInfo(wallPath);
@@ -140,25 +146,37 @@ namespace Wally
 		{
 			WallyTimer  wt  =sender as WallyTimer;
 
-			if(wt.mbShuffle)
+			bool	bGood	=false;
+			string	path	="";
+
+			while(!bGood)
 			{
-				wt.mIndex	=wt.mRand.Next(wt.mFiles.Count);
-			}
-			else
-			{
-				wt.mIndex++;
+				if(wt.mbShuffle)
+				{
+					wt.mIndex	=wt.mRand.Next(wt.mFiles.Count);
+				}
+				else
+				{
+					wt.mIndex++;
+				}
+
+				if(wt.mIndex >= wt.mFiles.Count)
+				{
+					wt.mIndex	=0;
+				}
+
+				//make sure it is still there
+				path	=wt.mFiles[wt.mIndex].FullName;
+				if(File.Exists(path))
+				{
+					bGood	=true;
+				}
 			}
 
-			if(wt.mIndex >= wt.mFiles.Count)
-			{
-				wt.mIndex	=0;
-			}
-
-			//check size
-			string	path	=wt.mFiles[wt.mIndex].FullName;
 			bool	bSpan	=false;
 			bool	bTile	=false;
 
+			//check size if possible TODO: other formats
 			if(path.EndsWith(".png"))
 			{
 				int	width, height;
